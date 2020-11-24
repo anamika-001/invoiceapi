@@ -31,14 +31,23 @@ class UserController extends Controller
                 'responceCode'            =>  $this->failedStatus,
                ]);
            }else{
-               $member = LoginUser::where('mobile',$request->mobile)->where('password',$request->password)->where('active','enable')->first();
-              if($member){
-                $otp=rand('0000','9999');
-                $login = new LoginUser;
-                $login->mobile=$request->mobile;
-                $login->password=$request->password;
-                $login->otp = $otp;
-                $login->save();
+
+            $member = LoginUser::where('mobile',$request->mobile)->where('password',$request->password)->first();
+
+            if($member){
+
+               // $otp=rand('1111','9999');
+
+                $updateotp=LoginUser::where('id', '=',  3)->update(['otp'=> rand('1111','9999')]);
+
+                // dd($updateotp);
+
+                // $login = new LoginUser;
+                // $login->mobile=$request->mobile;
+                // $login->password=$request->password;
+                // $login->otp = $otp;
+                // $login->save();
+
                  $dbotp=LoginUser::select('otp')->where('id', 3)->first();
                  if($dbotp->otp==$request->otp){
                     return response()->json([
