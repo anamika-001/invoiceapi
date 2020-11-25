@@ -14,8 +14,7 @@ class UserController extends Controller
 
         $mobile = $request->mobile;
         $password=$request->password;
-        $otp=$request->otp;
-         if(empty($mobile)){
+       if(empty($mobile)){
             return response()->json([
                 'responceMessage'         => 'mobile_no is required',
                 'responceCode'            =>  $this->failedStatus,
@@ -25,48 +24,41 @@ class UserController extends Controller
                 'responceMessage'         => 'password is required',
                 'responceCode'            =>  $this->failedStatus,
                ]);
-           }elseif(empty($otp)){
-            return response()->json([
-                'responceMessage'         => 'otp is required',
-                'responceCode'            =>  $this->failedStatus,
-               ]);
            }else{
+            $otp = rand('1111','9999');
+            $countMobileNo = LoginUser::where('mobile',$mobile)->where('active',Null)->count();
 
-            $member = LoginUser::where('mobile',$request->mobile)->where('password',$request->password)->first();
+            if($countMobileNo==1){
+                $userMobileData = LoginUser::where('mobile',$mobile)->first();
+                $data = array(
+                    'otp' => $otp,
+                   );
 
-            if($member){
+           $updateOtp =   LoginUser::where('mobile',$mobile)->update($data);
+           if ($updateOtp) {
+             return response()->json([
+              'responceMessage'         => 'otp send on your mobile no.',
+              'responceCode'            =>  $this->successStatus,
+              'mobile'               =>  $userMobileData->mobile,
+              'otp'                     =>  (string)$otp,
+           ]);
+           }
+           else{
+             return response()->json([
+            'responceMessage'         => 'otp sending failed',
+            'responceCode'            =>  $this->failedStatus,
+           ]);
+           }
+        }else{
+                return response()->json([
+                    'responceMessage'         => 'your number is not register',
+                    'responceCode'            =>  $this->failedStatus,
+                   ]);
 
-               // $otp=rand('1111','9999');
-
-                $updateotp=LoginUser::where('id', '=',  3)->update(['otp'=> rand('1111','9999')]);
-
-                // dd($updateotp);
-
-                // $login = new LoginUser;
-                // $login->mobile=$request->mobile;
-                // $login->password=$request->password;
-                // $login->otp = $otp;
-                // $login->save();
-
-                 $dbotp=LoginUser::select('otp')->where('id', 3)->first();
-                 if($dbotp->otp==$request->otp){
-                    return response()->json([
-                        'responceMessage'         => 'otp verified successfully',
-                        'responceCode'            =>  $this->successStatus,
-                       ]);
-                }
-                else{
-                    return response()->json([
-                            'responceMessage'         => 'incorrect otp',
-                            'responceCode'            =>  $this->failedStatus,
-                           ]);
-                }
-             }
             }
 
-
-
         }
-
     }
+}
+
 
